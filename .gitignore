@@ -1,0 +1,12 @@
+session
+
+.vscode/*
+*/*.md
+*.in
+
+*.exe
+*.tmp
+*.hi
+*.o
+
+test.hs
