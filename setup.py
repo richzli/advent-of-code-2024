@@ -23,4 +23,5 @@ open(f"{folder}/{day:02}.md", "w").write(
         , "html.parser").find("article", attrs={"class": "day-desc"})).encode("utf-8").decode("unicode-escape")
     )
 )
-open(f"{folder}/{day:02}-1{EXTENSION}", "w").write(template)
+if len(sys.argv) < 3:
+    open(f"{folder}/{day:02}-1{EXTENSION}", "w").write(template)
