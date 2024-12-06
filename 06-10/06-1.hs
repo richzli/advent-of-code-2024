@@ -67,7 +67,24 @@ bounds m n (x, y) = x >= 0 && x < m && y >= 0 && y < n
 
 ---
 
+nextPos :: (Point, Int) -> (Point, Int)
+nextPos (p, d) = (p `addPoint` (d4 !! d), d)
+
+turnRight :: (Point, Int) -> (Point, Int)
+turnRight (p, d) = (p, (d + 3) `mod` 4)
+
+simulate :: (Int, Int, Set.Set Point) -> Set.Set (Point, Int) -> (Point, Int) -> Int
+simulate c@(m, n, b) s x@(p, d) = case (x `elem` s || not (bounds m n p), fst (nextPos x) `elem` b) of
+    (True, _) -> Set.size $ Set.map fst s
+    (False, False) -> simulate c (Set.insert x s) (nextPos x)
+    (False, True) -> simulate c (Set.insert x s) (turnRight x)
+
 main :: IO ()
 main = do
-    input <- getContents
-    print ""
+    input <- parseLines <$> getContents
+    let m = length input
+    let n = length $ head input
+    let blocks = Set.fromList $ fmap fst $ filter ((=='#') . snd) $ enumerate2d input
+    let start = fst $ head $ filter ((=='^') . snd) $ enumerate2d input
+
+    print $ simulate (m, n, blocks) Set.empty (start, 2)
