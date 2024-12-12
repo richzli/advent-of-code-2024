@@ -68,7 +68,27 @@ bounds m n (x, y) = x >= 0 && x < m && y >= 0 && y < n
 
 ---
 
+dfs :: Map.Map Point Char -> (Set.Set Point, (Int, Int)) -> Point -> (Set.Set Point, (Int, Int))
+dfs grid s@(vis, (perim, area)) p = if p `elem` vis then s else
+    foldr (\p' s'@(vis', (perim', area')) -> 
+        case (Map.lookup p' grid == Map.lookup p grid, p' `elem` vis') of
+            (False, _) -> (vis', (perim' + 1, area'))
+            (True, False) -> dfs grid s' p'
+            _ -> s'
+    ) (Set.insert p vis, (perim, area + 1)) $ addPoint p <$> d4
+
+solve :: Map.Map Point Char -> Set.Set Point -> [Point] -> [(Int, Int)]
+solve grid vis (p:ps)
+    | p `elem` vis = (0, 0) : solve grid vis ps
+    | otherwise    = ans : solve grid (Set.union vis vis') ps
+        where (vis', ans) = dfs grid (Set.empty, (0, 0)) p
+solve _ _ [] = []
+
 main :: IO ()
 main = do
-    input <- getContents
-    print ""
+    input <- parseLines <$> getContents
+    let m = length input
+    let n = length $ head input
+    let grid = Map.fromList $ enumerate2d input
+
+    print $ sum $ fmap (\x -> fst x * snd x) $ solve grid Set.empty $ (,) <$> [0..(m-1)] <*> [0..(n-1)]
