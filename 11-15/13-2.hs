@@ -69,7 +69,25 @@ bounds m n (x, y) = x >= 0 && x < m && y >= 0 && y < n
 
 ---
 
+parseBlock :: [String] -> [[Int]]
+parseBlock = reverse . fmap (mapMaybe (readMaybe::String->Maybe Int) . fmap strip . split (`elem` ['+', '=', ',']))
+
+matMul :: [[Int]] -> [[Int]] -> [[Int]]
+matMul a b = transpose $ (<*>) ((sum .) . zipWith (*) <$> a) . pure <$> transpose b
+
+solve :: [[Int]] -> [Int]
+solve (b:a)
+    | d == 0                   = [0, 0] -- :clown:
+    | all ((== 0) . (`mod` d)) c = (`div` d) <$> c
+    | otherwise                = [0, 0]
+    where
+        [[x, y], [z, w]] = transpose a
+        d = x * w - y * z
+        g = gcd x z
+        c = head $ transpose $ matMul [[w, -y], [-z, x]] $ transpose [(+10000000000000) <$> b]
+
 main :: IO ()
 main = do
-    input <- getContents
-    print ""
+    input <- fmap parseBlock . split null . parseLines <$> getContents
+    
+    print $ sum $ sum . zipWith (*) [1, 3] . solve <$> input
